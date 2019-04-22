@@ -60,6 +60,7 @@ class ObservableTable(Observer):
             key = self.ui.item(row, 0).text()
             value = item.text()
             self.dict[key] = value
+        
         l = list()
         for k in self.dict:
             l.append((k,self.dict[k]))
