@@ -23,7 +23,7 @@ def variableNameParsing(txt: str):
 
 
 class Observer(ABC):
-    def notify(self, data):
+    def update(self, data):
         pass
 
 # Observe input table
@@ -37,7 +37,7 @@ class ObservableTable(Observer):
         # connect event
         self.ui.itemChanged.connect(self.updateDict)
 
-    def notify(self, data):
+    def update(self, data):
         variables = variableNameParsing(data)
         self.ui.setRowCount(len(variables))
         for index, variable in enumerate(variables):
@@ -55,7 +55,6 @@ class ObservableTable(Observer):
         row = item.row()
         col = item.column()
         if col == 1:
-            print(item.text())
             key = self.ui.item(row, 0).text()
             value = item.text()
             self.dict[key] = value
@@ -68,7 +67,7 @@ class ObservableView(Observer):
     def __init__(self, ui: QtWidgets):
         self.ui = ui
 
-    def notify(self, data):
+    def update(self, data):
         return data
 
 
@@ -84,7 +83,7 @@ class ObserversCollection:
 
     def notifyObservers(self, data):  # trigger when event
         for observer in self.collection:
-            observer.notify(data)
+            observer.update(data)
         return
 
 
@@ -112,12 +111,12 @@ class Application:
 
     def inputChange(self, *args):  # trigger when textinput data changed
         # parse new Tree
-        self.tree = "abc"
+        # self.tree = "abc"
         # notify
-        data = self.ui.textEdit.toPlainText()
-        self.observerCollection.notifyObservers(data)
+        self.tree = self.ui.textEdit.toPlainText()
+        self.observerCollection.notifyObservers(self.tree)
 
-    def render(self):
+    def display(self):
         self.MainWindow.show()
         sys.exit(self.app.exec_())
 
@@ -125,4 +124,4 @@ class Application:
 if __name__ == "__main__":
     # Setup UI
     App = Application("")
-    App.render()
+    App.display()

@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -67,10 +66,15 @@ class Ui_MainWindow(object):
         self.treeViewWidget.setFont(font)
         self.treeViewWidget.setObjectName("treeViewWidget")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(20, 160, 301, 351))
-        self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setGeometry(QtCore.QRect(20, 160, 300, 351))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.tableWidget.setFont(font)
         self.tableWidget.setRowCount(1)
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.horizontalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(135)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1117, 21))
@@ -98,3 +102,4 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Variables"))
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+
