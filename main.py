@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 import sys
 import re
 
+from api import create_lookup
+
 
 # program running
 def variableNameParsing(txt: str):
@@ -33,6 +35,7 @@ class ObservableTable(Observer):
     def __init__(self, ui: QtWidgets.QTableWidget):
         self.ui = ui
         self.dict = dict()
+        self.lookup = dict()
 
         # connect event
         self.ui.itemChanged.connect(self.updateDict)
@@ -46,7 +49,6 @@ class ObservableTable(Observer):
                 self.dict[variable] if variable in self.dict else "0")
             self.ui.setItem(index, 0, key)
             self.ui.setItem(index, 1, value)
-
         # self.ui.resizeColumnsToContents()
         # self.ui.resizeRowsToContents()
         self.ui.show()
@@ -58,6 +60,11 @@ class ObservableTable(Observer):
             key = self.ui.item(row, 0).text()
             value = item.text()
             self.dict[key] = value
+        l = list()
+        for k in self.dict:
+            l.append((k,self.dict[k]))
+        self.lookup = create_lookup(l)
+        print(self.lookup)
 
 
 # Observe treeview
@@ -101,6 +108,7 @@ class Application:
 
         # setup connect
         self.ui.textEdit.textChanged.connect(self.inputChange)
+        
         # self.ui.pushButton.clicked.connect()
 
     def initObservers(self):

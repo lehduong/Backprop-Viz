@@ -44,7 +44,7 @@ class Expression(Tensor):
 class Variable(Tensor):
     def __init__(self,name:str,value:float=0):
         self.name = name
-        self.value = np.random.randint(0,10,1)[0]
+        self.value = value
         self.grad = 0
         
     def calculation(self):
