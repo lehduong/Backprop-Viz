@@ -56,9 +56,10 @@ def plot_grad_tree_from_expr(expr:str,lookup):
     v = BackwardVisitor()
     ctx = {'grad':1,'op':'+','value':0}
     v.visit(forward_tree,ctx)
-
+    print("="*10)
+    print(forward_tree)
     plt = plot_grad_tree_from_tree(forward_tree)
-    plt.show()
+    return plt
 
 def plot_grad_tree_from_tree(tree):
     v = find_nodes(tree)
@@ -87,8 +88,8 @@ def plot_grad_tree_from_tree(tree):
     cmap = plt.cm.RdYlGn
     fig, ax = plt.subplots()
     plt.title('draw_networkx')
-    #pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot', args='-Nfontsize=10 -Nwidth="10" -Nheight="1" -Nmargin=0 -Gfontsize=8')
-    pos = nx.spring_layout(G)
+    pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot', args='-Nfontsize=10 -Nwidth="10" -Nheight="1" -Nmargin=0 -Gfontsize=8')
+    #pos = nx.spring_layout(G)
     nx.draw(G, pos, with_labels=True, arrows=True,
             node_size=1500, node_color=colormap)
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
@@ -101,3 +102,23 @@ def parse(text: str):
     plot_grad_tree_from_expr(text,lookup)
 
 #parse(text)
+
+class Adapter:
+    def __init__(self,expr,lookup):
+        self.expr = expr
+        self.lookup = lookup 
+        self.adaptee = PlotAdaptee(expr,lookup)
+    def draw(self):
+        return self.adaptee.draw()
+
+class PlotAdaptee:
+    def __init__(self,expr,lookup):
+        self.expr = expr
+        self.lookup = lookup 
+    def draw(self):
+        return plot_grad_tree_from_expr(self.expr,self.lookup)        
+    
+
+expr = "b+c"
+lookup = {"b":Variable("b",1),"c":Variable("c",2)}
+#Adapter(expr,lookup).draw().show()

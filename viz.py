@@ -10,8 +10,11 @@ def find_edges(head):
         left_edges = find_edges(head.lhs)
         right_edges = find_edges(head.rhs)
         ret = ret + left_edges + right_edges
-        ret.append((head.lhs.name,head.name,head.lhs_grad))
-        ret.append((head.rhs.name,head.name,head.rhs_grad))
+        if head.lhs.name != head.rhs.name:
+            ret.append((head.lhs.name,head.name,head.lhs_grad))
+            ret.append((head.rhs.name,head.name,head.rhs_grad))
+        else:
+            ret.append((head.lhs.name,head.name,2*head.lhs_grad))
         return ret
 
 def find_nodes(head):

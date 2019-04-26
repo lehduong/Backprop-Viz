@@ -9,8 +9,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 import sys
 import re
+import os
+from PyQt5 import QtGui
 
-from api import create_lookup
+from api import create_lookup,Adapter
 
 
 # program running
@@ -20,7 +22,10 @@ def variableNameParsing(txt: str):
     matches = re.finditer(regex, txt, re.MULTILINE)
     for _, match in enumerate(matches, start=1):
         ret.append(match.group())
-
+    ret = set(ret)
+    ret = list(ret)
+    if len(ret) > 0:
+        ret.sort()
     return ret
 
 
@@ -32,13 +37,19 @@ class Observer(ABC):
 
 
 class ObservableTable(Observer):
-    def __init__(self, ui: QtWidgets.QTableWidget):
+    def __init__(self, ui: QtWidgets.QTableWidget, observer):
         self.ui = ui
         self.dict = dict()
         self.lookup = dict()
+        self.observerCollection = self.initObservers(observer)
 
         # connect event
         self.ui.itemChanged.connect(self.updateDict)
+
+    def initObservers(self, observer):
+        collection = ObserversCollection()
+        collection.registerObserver(observer)
+        return collection
 
     def update(self, data):
         variables = variableNameParsing(data)
@@ -65,7 +76,8 @@ class ObservableTable(Observer):
         for k in self.dict:
             l.append((k,self.dict[k]))
         self.lookup = create_lookup(l)
-        print(self.lookup)
+        
+        self.observerCollection.notifyObservers(self.lookup)
 
 
 # Observe treeview
@@ -74,10 +86,27 @@ class ObservableTable(Observer):
 class ObservableView(Observer):
     def __init__(self, ui: QtWidgets):
         self.ui = ui
+        self.expr = ""
+        self.lookup = dict()
 
     def update(self, data):
-        return data
-
+        if type(data) is str:
+            self.expr = data
+        else:
+            self.lookup = data
+        try:   
+            plt = Adapter(self.expr,self.lookup).draw()
+            plt.savefig("tmp.jpg")
+            self.ui.setPixmap(QtGui.QPixmap(os.getcwd() + '/tmp.jpg'))
+            self.ui.show()
+            #fig, ax = plt.subplots()
+            # self.tmp = FigureCanvas(plt)
+            # lay = QtWidgets.QVBoxLayout(self.ui)  
+            # lay.setContentsMargins(0, 0, 0, 0)      
+            # lay.addWidget(self.tmp)
+            # lay.show()
+        except Exception:
+            pass
 
 class ObserversCollection:
     def __init__(self):
@@ -109,13 +138,13 @@ class Application:
 
         # setup connect
         self.ui.textEdit.textChanged.connect(self.inputChange)
-        
-        # self.ui.pushButton.clicked.connect()
+        #self.ui.pushButton.clicked.connect(self.plot)
 
     def initObservers(self):
         collection = ObserversCollection()
-        collection.registerObserver(ObservableTable(self.ui.tableWidget))
-        collection.registerObserver(ObservableView(self.ui.treeViewWidget))
+        view = ObservableView(self.ui.label_4)
+        collection.registerObserver(ObservableTable(self.ui.tableWidget, view))
+        collection.registerObserver(view)
         return collection
 
     def inputChange(self, *args):  # trigger when textinput data changed
@@ -129,6 +158,38 @@ class Application:
         self.MainWindow.show()
         sys.exit(self.app.exec_())
 
+    def plot(self,*args):
+        pass
+
+# class PrettyWidget(QtGui.QWidget):
+
+#     def __init__(self, parent=None):
+#         QtGui.QWidget.__init__(self, parent=parent)
+#         self.initUI()
+
+#     def initUI(self):
+#         self.resize(1000,600)
+#         self.center()
+#         self.setWindowTitle('Browser')
+
+#         self.lb = QtGui.QLabel(self)
+#         pixmap = QtGui.QPixmap("tmp.jpg")
+#         height_of_label = 100
+#         self.lb.resize(self.width(), height_of_label)
+#         self.lb.setPixmap(pixmap.scaled(self.lb.size(), QtCore.Qt.IgnoreAspectRatio))
+#         self.show()    
+
+#     def resizeEvent(self, event):
+#         self.lb.resize(self.width(), self.lb.height())
+#         self.lb.setPixmap(self.lb.pixmap().scaled(self.lb.size(), QtCore.Qt.IgnoreAspectRatio))
+#         QtGui.QWidget.resizeEvent(self, event)
+
+
+#     def center(self):
+#         qr = self.frameGeometry()
+#         cp = QtGui.QDesktopWidget().availableGeometry().center()
+#         qr.moveCenter(cp)
+#         self.move(qr.topLeft())
 
 if __name__ == "__main__":
     # Setup UI
